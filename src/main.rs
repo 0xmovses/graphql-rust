@@ -34,7 +34,11 @@ async fn main() -> Result<()> {
 }
 
 #[route("/graphql", method = "POST")]
-async fn graphql(schema: web::Data<Schema>, data: web::Json<GraphQLRequest>, context: Data<DatabaseContext>) -> impl Responder {
+async fn graphql(
+    schema: web::Data<Schema>,
+    data: web::Json<GraphQLRequest>,
+    context: Data<DatabaseContext>,
+) -> impl Responder {
     let response = data.execute(&schema, &context).await;
     HttpResponse::Ok().json(response)
 }
