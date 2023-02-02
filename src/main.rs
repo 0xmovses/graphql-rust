@@ -1,11 +1,20 @@
-use std::io::Result;
+use std::{io::Result, sync::Arc};
 
-use actix_web::{App, HttpServer, Responder, HttpResponse, route};
+use actix_web::{App, HttpServer, Responder, HttpResponse, route, web::{Data, self}};
+use juniper::http::GraphQLRequest;
+use schema::create_schema;
+
+use crate::schema::{Schema, Database};
+
+pub mod schema;
+pub mod query;
 
 #[actix_web::main]
 async fn main() -> Result<()> {
+    let schema = Arc::new(create_schema());
     let app = move || {
         App::new()
+            .app_data(Data::from(schema.clone()))
             .service(graphql)
     };
 
@@ -17,7 +26,9 @@ async fn main() -> Result<()> {
 }
 
 #[route("/graphql", method = "POST")]
-async fn graphql() -> impl Responder {
-    HttpResponse::Ok()
+async fn graphql(schema: web::Data<Schema>, data: web::Json<GraphQLRequest>) -> impl Responder {
+    let context = Database::new() ;
+    let response = data.execute(&schema, &context).await;
+    HttpResponse::Ok().json(response)
 }
 
