@@ -1,4 +1,4 @@
-use juniper::{graphql_object, FieldResult};
+use juniper::{graphql_object, FieldResult, FieldError};
 
 use crate::schema::{Database, User};
 
@@ -16,5 +16,14 @@ impl QueryRoot {
         }
 
         Ok(result)
+    }
+
+    fn get_user_by_id(context: &Database, id: i32) -> FieldResult<User> {
+        let user = context.get_user_by_id(&id);
+        match user {
+            Some(user) => Ok(User { id: user.id, name: user.name.clone() }),
+            None => Err(FieldError::from("could not find the user"))
+        }
+
     }
 }

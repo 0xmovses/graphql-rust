@@ -35,6 +35,10 @@ impl Database {
     pub fn get_all_users(&self) -> Vec<&User> {
         Vec::from_iter(self.users.values())
     }
+
+    pub fn get_user_by_id(&self, id: &i32) -> Option<&User> {
+        self.users.get(id)
+    }
 }
 
 
